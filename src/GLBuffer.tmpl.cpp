@@ -15,24 +15,30 @@ GLBuffer<TARGET>::~GLBuffer()
 template <GLenum TARGET>
 void GLBuffer<TARGET>::init(size_t size, const void *source, GLenum usage)
 {
-	if (!initialized) {
-		gen();
-		glBindBuffer(TARGET, name);
-		glBufferData(TARGET, size, source, usage);
-		initialized = true;
-	} else {
+	if (initialized)
+		panic("buffer was already initialized; reinit() must be used");
 
-		// the object must be bound after init()
-		glBindBuffer(TARGET, name);
-	}
+	gen();
+	glBindBuffer(TARGET, name);
+	glBufferData(TARGET, size, source, usage);
+	initialized = true;
+}
+
+template <GLenum TARGET>
+void GLBuffer<TARGET>::reinit(size_t size, const void *source)
+{
+	if (!initialized)
+		panic("buffer was not properly initialized (init() was not called)");
+
+	glBindBuffer(TARGET, name);
+	glBufferData(TARGET, size, source, 0);
 }
 
 template <GLenum TARGET>
 void GLBuffer<TARGET>::bind()
 {
 	if (!initialized)
-		panic("Buffer was not properly initialized");
-
+		panic("buffer was not properly initialized (init() was not called)");
 	glBindBuffer(TARGET, name);
 }
 
@@ -49,6 +55,6 @@ void GLBuffer<TARGET>::gen()
 		panic("object already exists");
 	glGenBuffers(1, &name);
 	if (!name) {
-		panic("Unable to generate a GL Buffer object");
+		panic("unable to generate a GL Buffer object");
 	}
 }
