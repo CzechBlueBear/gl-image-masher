@@ -3,7 +3,6 @@
 template <GLenum TARGET>
 GLTexture<TARGET>::GLTexture()
 {
-	glGenTextures(1, &name);
 }
 
 template <GLenum TARGET>
@@ -26,14 +25,10 @@ void GLTexture<TARGET>::bindNone()
 }
 
 template <GLenum TARGET>
-void GLTexture<TARGET>::bound_setMinFilter(GLenum minFilter)
+void GLTexture<TARGET>::setMinMagFilter(GLenum minFilter, GLenum magFilter)
 {
+	bind();
 	glTexParameterf(TARGET, GL_TEXTURE_MIN_FILTER, minFilter);
-}
-
-template <GLenum TARGET>
-void GLTexture<TARGET>::bound_setMagFilter(GLenum magFilter)
-{
 	glTexParameterf(TARGET, GL_TEXTURE_MAG_FILTER, magFilter);
 }
 

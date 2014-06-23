@@ -17,8 +17,12 @@ public:
 	virtual ~GLTexture();
 	void bind() override;
 	static void bindNone();
-	static void bound_setMinFilter(GLenum minFilter);
-	static void bound_setMagFilter(GLenum magFilter);
+
+	/**
+	 * Sets the minification and magnification filter of the texture.
+	 * @note The call binds the texture which remains bound after returning.
+	 */
+	void setMinMagFilter(GLenum minFilter, GLenum magFilter);
 
 protected:
 
@@ -35,7 +39,7 @@ public:
 	 * Loads the specified image into the texture.
 	 * A texture loaded this way does not have mipmaps. Initial
 	 * magnifying and minifying filter is set to LINEAR.
-	 * @note After the call, the texture is bound.
+	 * @note The call binds the texture which remains bound after returning.
 	 */
 	void load(PixelImage &image);
 };

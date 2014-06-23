@@ -11,13 +11,13 @@ GLTexture2D::~GLTexture2D()
 
 void GLTexture2D::load(PixelImage &image)
 {
-	bind();
-
-	// reset the filtering (because if it was set to mipmaps, which is the default,
+	// Reset the filtering (because if it was set to mipmaps, which is the default,
 	// loading just one image would make the texture incomplete and unusable)
-	bound_setMinFilter(GL_LINEAR);
-	bound_setMagFilter(GL_LINEAR);
+	// This call also binds the texture.
+	setMinMagFilter(GL_LINEAR, GL_LINEAR);
 
+	// upload the image to the (currently bound) texture, resetting its size
+	// and replacing old contents
 	switch (image.getFormat()) {
 	case image.Format::RGB:
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
