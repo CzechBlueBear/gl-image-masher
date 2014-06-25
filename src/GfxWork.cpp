@@ -23,11 +23,22 @@ GfxWork::~GfxWork()
 
 void GfxWork::prepare()
 {
-	colorBuffer->init(GL_RGBA8, 1280, 1024);
-	depthBuffer->init(GL_DEPTH_COMPONENT16, 1280, 1024);
-	framebuffer->init(colorBuffer, depthBuffer);
+	PixelImage sourceImage;
+	sourceImage.loadTiff("input.tif");
 
-	glViewport(0, 0, 1280, 1024);
+	texture->load(sourceImage);
+
+	workspaceWidth = sourceImage.getWidth();
+	workspaceHeight = sourceImage.getHeight();
+
+	colorBuffer->init(GL_RGBA8, workspaceWidth, workspaceHeight);
+	checkGLErrors();
+	depthBuffer->init(GL_DEPTH_COMPONENT16, workspaceWidth, workspaceHeight);
+	checkGLErrors();
+	framebuffer->init(colorBuffer, depthBuffer);
+	checkGLErrors();
+
+	glViewport(0, 0, workspaceWidth, workspaceHeight);
 
 	static const std::array<SimpleTexturedVertex, 4> vertices {
 		SimpleTexturedVertex { { -1.0f, -1.0f, 0.0f }, { 0.0f, 1.0f } },		// top left
@@ -82,10 +93,6 @@ void GfxWork::prepare()
 	);
 
 	checkGLErrors();
-
-	PixelImage sourceImage;
-	sourceImage.loadTiff("input.tif");
-	texture->load(sourceImage);
 }
 
 void GfxWork::run()
@@ -116,8 +123,8 @@ void GfxWork::run()
 
 	// write it as a file
 	PixelImage result;
-	result.reset(1280, 1024);
-	result.screenshot(0, 0, 1280, 1024);
+	result.reset(workspaceWidth, workspaceHeight);
+	result.screenshot(0, 0, workspaceWidth, workspaceHeight);
 	if (!result.saveTiff("result.tif")) {
 		std::cerr << "error writing result.tiff" << std::endl;
 	}

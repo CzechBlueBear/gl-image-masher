@@ -5,19 +5,17 @@
 #include "GfxWork.hpp"
 #include "GLRuntime.hpp"
 
-GfxWork *theGfxWork = nullptr;
+//GfxWork *theGfxWork = nullptr;
 
 int main(int argc, char **argv)
 {
 	GLRuntime glRuntime;		// must be created before any GL-related objects
 
 	// create the graphics work thread object and execute it
-	theGfxWork = new GfxWork();
+	std::shared_ptr<GfxWork> theGfxWork = std::make_shared<GfxWork>();
 	theGfxWork->prepare();
 	theGfxWork->run();
 
 	// cleanup
-	delete theGfxWork;
-	theGfxWork = nullptr;
 	return 0;
 }

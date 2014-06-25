@@ -29,6 +29,8 @@ protected:
 	std::shared_ptr<GLFrameBuffer> framebuffer;
 	std::shared_ptr<GLRenderBuffer> colorBuffer;
 	std::shared_ptr<GLRenderBuffer> depthBuffer;
+	int workspaceWidth = 0;
+	int workspaceHeight = 0;
 };
 
 #endif
