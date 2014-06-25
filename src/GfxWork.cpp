@@ -5,40 +5,52 @@
 #include "Vertex.hpp"
 #include "main.hpp"
 
-GfxWork::GfxWork()
+GfxWork::GfxWork(const std::string &outputDirectory, int workspaceWidth, int workspaceHeight)
+	: workspaceWidth(workspaceWidth),
+	workspaceHeight(workspaceHeight),
+	outputDirectory(outputDirectory)
 {
-	vertexBuffer = std::make_shared<GLVertexBuffer>();
-	indexBuffer = std::make_shared<GLIndexBuffer>();
-	vao = std::make_shared<GLVertexArray>();
-	shaderProgram = std::make_shared<GLShaderProgram>();
-	texture = std::make_shared<GLTexture2D>();
-	framebuffer = std::make_shared<GLFrameBuffer>();
-	colorBuffer = std::make_shared<GLRenderBuffer>();
-	depthBuffer = std::make_shared<GLRenderBuffer>();
 }
 
 GfxWork::~GfxWork()
 {
 }
 
-void GfxWork::prepare()
+void GfxWork::processImage(const std::string &imagePath)
 {
 	PixelImage sourceImage;
-	sourceImage.loadTiff("input.tif");
+	sourceImage.loadTiff(imagePath);
 
-	texture->load(sourceImage);
+	if (!texture) {
+		texture = std::make_shared<GLTexture2D>();
+		texture->load(sourceImage);
+		checkGLErrors();
+	}
 
-	workspaceWidth = sourceImage.getWidth();
-	workspaceHeight = sourceImage.getHeight();
+	int imageWidth = sourceImage.getWidth();
+	int imageHeight = sourceImage.getHeight();
+	if (imageWidth > workspaceWidth)
+		imageWidth = workspaceWidth;
+	if (imageHeight > workspaceHeight)
+		imageHeight = workspaceHeight;
 
-	colorBuffer->init(GL_RGBA8, workspaceWidth, workspaceHeight);
-	checkGLErrors();
-	depthBuffer->init(GL_DEPTH_COMPONENT16, workspaceWidth, workspaceHeight);
-	checkGLErrors();
-	framebuffer->init(colorBuffer, depthBuffer);
-	checkGLErrors();
+	if (!colorBuffer) {
+		colorBuffer = std::make_shared<GLRenderBuffer>();
+		colorBuffer->init(GL_RGBA8, workspaceWidth, workspaceHeight);
+		checkGLErrors();
+	}
+	if (!depthBuffer) {
+		depthBuffer = std::make_shared<GLRenderBuffer>();
+		depthBuffer->init(GL_DEPTH_COMPONENT16, workspaceWidth, workspaceHeight);
+		checkGLErrors();
+	}
+	if (!framebuffer) {
+		framebuffer = std::make_shared<GLFrameBuffer>();
+		framebuffer->init(colorBuffer, depthBuffer);
+		checkGLErrors();
+	}
 
-	glViewport(0, 0, workspaceWidth, workspaceHeight);
+	glViewport(0, 0, imageWidth, imageHeight);
 
 	static const std::array<SimpleTexturedVertex, 4> vertices {
 		SimpleTexturedVertex { { -1.0f, -1.0f, 0.0f }, { 0.0f, 1.0f } },		// top left
@@ -51,52 +63,58 @@ void GfxWork::prepare()
 		0, 1, 2, 2, 1, 3
 	};
 
-/*
-	// An array of 3 vectors which represents 3 vertices
-	static const GLfloat triangleVertices[] = {
-	   -1.0f, -1.0f, 0.0f,
-	   1.0f, -1.0f, 0.0f,
-	   0.0f,  1.0f, 0.0f,
-	};
-*/
+	if (!shaderProgram) {
+		shaderProgram = std::make_shared<GLShaderProgram>();
+		shaderProgram->load("shaders/simple");
+		checkGLErrors();
+	}
 
-	shaderProgram->load("shaders/simple");
 	shaderProgram->bind();
-
 	glUniform1i(0, 0);
 
-	vao->bind();
-	vertexBuffer->init(vertices.size()*sizeof(SimpleTexturedVertex), vertices.data(), GL_STATIC_DRAW);
-	indexBuffer->init(sizeof(vertexOrder), vertexOrder, GL_STATIC_DRAW);
+	if (!vertexBuffer) {
+		vertexBuffer = std::make_shared<GLVertexBuffer>();
+		vertexBuffer->init(vertices.size()*sizeof(SimpleTexturedVertex), vertices.data(), GL_STATIC_DRAW);
+		checkGLErrors();
+	}
+	if (!indexBuffer) {
+		indexBuffer = std::make_shared<GLIndexBuffer>();
+		indexBuffer->init(sizeof(vertexOrder), vertexOrder, GL_STATIC_DRAW);
+		checkGLErrors();
+	}
 
 	checkGLErrors();
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(
-	   0,                  // attribute 0 is position
-	   3, GL_FLOAT,        // type: 3x float
-	   GL_FALSE,           // normalized?
+	if (!vao) {
+		vao = std::make_shared<GLVertexArray>();
+		vao->bind();
+		vertexBuffer->bind();
+		indexBuffer->bind();
 
-	   // stride and offset of the values in the array
-	   sizeof(SimpleTexturedVertex),
-	   (void*)(offsetof(SimpleTexturedVertex, position))
-	);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(
-		1,					// attribute 1 is texture coordinate
-		2, GL_FLOAT,		// type: 2x float
-		GL_FALSE,			// do not normalize
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(
+		0,                  // attribute 0 is position
+		3, GL_FLOAT,        // type: 3x float
+		GL_FALSE,           // normalized?
 
 		// stride and offset of the values in the array
 		sizeof(SimpleTexturedVertex),
-		(void*)(offsetof(SimpleTexturedVertex, textureCoordinates))
-	);
+		(void*)(offsetof(SimpleTexturedVertex, position))
+		);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(
+			1,					// attribute 1 is texture coordinate
+			2, GL_FLOAT,		// type: 2x float
+			GL_FALSE,			// do not normalize
 
-	checkGLErrors();
-}
+			// stride and offset of the values in the array
+			sizeof(SimpleTexturedVertex),
+			(void*)(offsetof(SimpleTexturedVertex, textureCoordinates))
+		);
+	} else {
+		vao->bind();
+	}
 
-void GfxWork::run()
-{
 	checkGLErrors();
 
 	// clear the scene
@@ -117,14 +135,13 @@ void GfxWork::run()
 
 	// ensure the image is fully rendered
 	glFlush();
-	//context->swapBuffers();
 
 	checkGLErrors();
 
 	// write it as a file
 	PixelImage result;
-	result.reset(workspaceWidth, workspaceHeight);
-	result.screenshot(0, 0, workspaceWidth, workspaceHeight);
+	result.reset(imageWidth, imageHeight);
+	result.screenshot(0, 0, imageWidth, imageHeight);
 	if (!result.saveTiff("result.tif")) {
 		std::cerr << "error writing result.tiff" << std::endl;
 	}

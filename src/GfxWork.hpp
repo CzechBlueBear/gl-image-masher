@@ -2,6 +2,7 @@
 #define GFX_WORK_HPP
 
 #include <memory>
+#include <string>
 #include "GLBuffer.hpp"
 #include "GLVertexArray.hpp"
 #include "GLShader.hpp"
@@ -12,12 +13,11 @@
 class GfxWork {
 public:
 
-	GfxWork();
+	GfxWork(const std::string &outputDirectory, int workspaceWidth, int workspaceHeight);
 	~GfxWork();
 	GfxWork(const GfxWork &source) = delete;
 	GfxWork &operator=(const GfxWork &source) = delete;
-	void prepare();
-	void run();
+	void processImage(const std::string &imagePath);
 
 protected:
 
@@ -29,8 +29,9 @@ protected:
 	std::shared_ptr<GLFrameBuffer> framebuffer;
 	std::shared_ptr<GLRenderBuffer> colorBuffer;
 	std::shared_ptr<GLRenderBuffer> depthBuffer;
-	int workspaceWidth = 0;
-	int workspaceHeight = 0;
+	int workspaceWidth;
+	int workspaceHeight;
+	std::string outputDirectory;
 };
 
 #endif
