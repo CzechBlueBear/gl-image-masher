@@ -1,5 +1,5 @@
 #include <iostream>
-#include <array>
+#include <cassert>
 #include "GfxWork.hpp"
 #include "PixelImage.hpp"
 #include "Vertex.hpp"
@@ -10,6 +10,12 @@ GfxWork::GfxWork(const std::string &outputDirectory, int workspaceWidth, int wor
 	workspaceHeight(workspaceHeight),
 	outputDirectory(outputDirectory)
 {
+	corners = {
+		SimpleTexturedVertex { { -1.0f, -1.0f, 0.0f }, { 0.0f, 1.0f } },		// top left
+		{ {  1.0f, -1.0f, 0.0f }, { 1.0f, 1.0f } },
+		{ { -1.0f,  1.0f, 0.0f }, { 0.0f, 0.0f } },
+		{ {  1.0f,  1.0f, 0.0f }, { 1.0f, 0.0f } },
+	};
 }
 
 GfxWork::~GfxWork()
@@ -52,13 +58,7 @@ void GfxWork::processImage(const std::string &imagePath)
 
 	glViewport(0, 0, imageWidth, imageHeight);
 
-	static const std::array<SimpleTexturedVertex, 4> vertices {
-		SimpleTexturedVertex { { -1.0f, -1.0f, 0.0f }, { 0.0f, 1.0f } },		// top left
-		{ {  1.0f, -1.0f, 0.0f }, { 1.0f, 1.0f } },
-		{ { -1.0f,  1.0f, 0.0f }, { 0.0f, 0.0f } },
-		{ {  1.0f,  1.0f, 0.0f }, { 1.0f, 0.0f } },
-	};
-
+	// two triangles form a rectangle
 	static const unsigned short vertexOrder[] {
 		0, 1, 2, 2, 1, 3
 	};
@@ -74,7 +74,7 @@ void GfxWork::processImage(const std::string &imagePath)
 
 	if (!vertexBuffer) {
 		vertexBuffer = std::make_shared<GLVertexBuffer>();
-		vertexBuffer->init(vertices.size()*sizeof(SimpleTexturedVertex), vertices.data(), GL_STATIC_DRAW);
+		vertexBuffer->init(corners.size()*sizeof(SimpleTexturedVertex), corners.data(), GL_STATIC_DRAW);
 		checkGLErrors();
 	}
 	if (!indexBuffer) {
@@ -145,4 +145,10 @@ void GfxWork::processImage(const std::string &imagePath)
 	if (!result.saveTiff("result.tif")) {
 		std::cerr << "error writing result.tiff" << std::endl;
 	}
+}
+
+void GfxWork::setCorner(Corner index, float x, float y)
+{
+	corners[static_cast<int>(index)].position[0] = x;
+	corners[static_cast<int>(index)].position[1] = y;
 }
