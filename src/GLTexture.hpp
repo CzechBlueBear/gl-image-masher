@@ -42,6 +42,8 @@ public:
 	 * @note The call binds the texture which remains bound after returning.
 	 */
 	void load(PixelImage &image);
+
+	void loadCompressed(PixelImage &image);
 };
 
 class GLTextureRectangle : public GLTexture<GL_TEXTURE_RECTANGLE> {

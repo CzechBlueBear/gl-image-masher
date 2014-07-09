@@ -29,7 +29,7 @@ void GfxWork::processImage(const std::string &imagePath)
 
 	if (!texture) {
 		texture = std::make_shared<GLTexture2D>();
-		texture->load(sourceImage);
+		texture->loadCompressed(sourceImage);
 		checkGLErrors();
 	}
 
