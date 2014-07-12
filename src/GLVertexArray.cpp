@@ -1,18 +1,14 @@
 #include <iostream>
 #include "GLVertexArray.hpp"
 
-GLVertexArray::GLVertexArray()
+std::shared_ptr<GLVertexArray> GLVertexArray::create()
 {
-}
-
-GLVertexArray::~GLVertexArray()
-{
-	glDeleteVertexArrays(1, &name);
+	auto that = std::shared_ptr<GLVertexArray>(new GLVertexArray());
+	return that;
 }
 
 void GLVertexArray::bind()
 {
-	if (!name) gen();
 	glBindVertexArray(name);
 }
 
@@ -21,11 +17,14 @@ void GLVertexArray::bindNone()
 	glBindVertexArray(0);
 }
 
-void GLVertexArray::gen()
+GLVertexArray::GLVertexArray()
 {
-	if (name)
-		panic("object already exists");
 	glGenVertexArrays(1, &name);
 	if (!name)
-		panic("unable to generate a GL vertex array object");
+		panic("Unable to create a GL vertex array object: glGenVertexArrays() failed: " + translateGLError(glGetError()));
+}
+
+GLVertexArray::~GLVertexArray()
+{
+	glDeleteVertexArrays(1, &name);
 }

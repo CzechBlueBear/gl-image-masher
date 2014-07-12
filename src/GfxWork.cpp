@@ -41,19 +41,13 @@ void GfxWork::processImage(const std::string &imagePath)
 		imageHeight = workspaceHeight;
 
 	if (!colorBuffer) {
-		colorBuffer = std::make_shared<GLRenderBuffer>();
-		colorBuffer->init(GL_RGBA8, workspaceWidth, workspaceHeight);
-		checkGLErrors();
+		colorBuffer = GLRenderBuffer::create(GL_RGBA8, workspaceWidth, workspaceHeight);
 	}
 	if (!depthBuffer) {
-		depthBuffer = std::make_shared<GLRenderBuffer>();
-		depthBuffer->init(GL_DEPTH_COMPONENT16, workspaceWidth, workspaceHeight);
-		checkGLErrors();
+		depthBuffer = GLRenderBuffer::create(GL_DEPTH_COMPONENT16, workspaceWidth, workspaceHeight);
 	}
 	if (!framebuffer) {
-		framebuffer = std::make_shared<GLFrameBuffer>();
-		framebuffer->init(colorBuffer, depthBuffer);
-		checkGLErrors();
+		framebuffer = GLFrameBuffer::create(colorBuffer, depthBuffer);
 	}
 
 	glViewport(0, 0, imageWidth, imageHeight);
@@ -73,20 +67,18 @@ void GfxWork::processImage(const std::string &imagePath)
 	glUniform1i(0, 0);
 
 	if (!vertexBuffer) {
-		vertexBuffer = std::make_shared<GLVertexBuffer>();
-		vertexBuffer->init(corners.size()*sizeof(SimpleTexturedVertex), corners.data(), GL_STATIC_DRAW);
-		checkGLErrors();
+		vertexBuffer = GLBuffer::create(GL_ARRAY_BUFFER, corners.size()*sizeof(SimpleTexturedVertex), corners.data(), GL_STATIC_DRAW);
+		// vertex buffer is now automatically bound
 	}
 	if (!indexBuffer) {
-		indexBuffer = std::make_shared<GLIndexBuffer>();
-		indexBuffer->init(sizeof(vertexOrder), vertexOrder, GL_STATIC_DRAW);
-		checkGLErrors();
+		indexBuffer = GLBuffer::create(GL_ELEMENT_ARRAY_BUFFER, sizeof(vertexOrder), vertexOrder, GL_STATIC_DRAW);
+		// index buffer is now automatically bound
 	}
 
 	checkGLErrors();
 
 	if (!vao) {
-		vao = std::make_shared<GLVertexArray>();
+		vao = GLVertexArray::create();
 		vao->bind();
 		vertexBuffer->bind();
 		indexBuffer->bind();
@@ -124,10 +116,9 @@ void GfxWork::processImage(const std::string &imagePath)
 
 	checkGLErrors();
 
-	// Draw the triangle !
+	// draw the deformed image as two triangles
 	shaderProgram->bind();
-	vao->bind();
-	//glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
+	//vao->bind();
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 	vao->bindNone();
 

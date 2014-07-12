@@ -1,50 +1,32 @@
 #include "GLFramebuffer.hpp"
 #include "panic.hpp"
 
-GLRenderBuffer::GLRenderBuffer()
-	: initialized(false)
-{
-}
-
 GLRenderBuffer::~GLRenderBuffer()
 {
-	if (name)
-		glDeleteRenderbuffers(1, &name);
+	glDeleteRenderbuffers(1, &name);
 }
 
-void GLRenderBuffer::gen()
+std::shared_ptr<GLRenderBuffer> GLRenderBuffer::create(GLenum format, int width, int height)
 {
-	if (!name) {
-		glGenRenderbuffers(1, &name);
-		if (!name)
-			panic("Unable to allocate a GLRenderbuffer");
-	}
-}
-
-void GLRenderBuffer::init(GLenum format, int width, int height)
-{
-	// calling init() more than once is redundant but still binds the buffer
-	if (initialized) {
-		bind();
-		return;
-	}
-
-	gen();
-	glBindRenderbuffer(GL_RENDERBUFFER, name);
+	auto that = std::shared_ptr<GLRenderBuffer>(new GLRenderBuffer());
+	glBindRenderbuffer(GL_RENDERBUFFER, that->name);
 	glRenderbufferStorage(GL_RENDERBUFFER, format, width, height);
-	initialized = true;
+	return that;
 }
 
 void GLRenderBuffer::bind()
 {
-	if (!name)
-		panic("GLRenderBuffer used without proper initialization");
-
-	// bind the existing object
 	glBindRenderbuffer(GL_RENDERBUFFER, name);
 }
 
 void GLRenderBuffer::bindNone()
 {
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+}
+
+GLRenderBuffer::GLRenderBuffer()
+{
+	glGenRenderbuffers(1, &name);
+	if (!name)
+		panic("Unable to create a GL renderbuffer: glGenRenderbuffers() failed: " + translateGLError(glGetError()));
 }

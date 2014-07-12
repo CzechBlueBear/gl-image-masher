@@ -15,7 +15,7 @@ public:
 
 protected:
 
-	void gen() override;
+	void gen();
 
 	/**
 	 * Compiles the shader. Called automatically from load()
@@ -56,7 +56,7 @@ protected:
 	std::shared_ptr<GLVertexShader> vertexShader;
 	std::shared_ptr<GLFragmentShader> fragmentShader;
 
-	void gen() override;
+	void gen();
 	bool link();
 };
 

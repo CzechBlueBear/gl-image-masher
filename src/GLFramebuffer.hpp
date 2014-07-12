@@ -11,25 +11,26 @@
 class GLFrameBuffer : public GLBindableObject {
 public:
 
-	GLFrameBuffer();
 	~GLFrameBuffer();
-	void bind() override;
-	static void bindNone();
 
 	/**
-	 * Initializes a framebuffer with two subordinate buffers: the color buffer
-	 * and the depth buffer.
-	 * @note The call binds the buffer, which stays bound after it returns.
+	 * Creates a new framebuffer object, binds it,
+	 * attaches the given color and depth buffer to it,
+	 * and returns a pointer to it.
 	 */
-	void init(std::shared_ptr<GLRenderBuffer> colorBuffer,
+	static std::shared_ptr<GLFrameBuffer> create(
+		std::shared_ptr<GLRenderBuffer> colorBuffer,
 		std::shared_ptr<GLRenderBuffer> depthBuffer);
+
+	void bind() override;
+	static void bindNone();
 
 protected:
 
 	std::shared_ptr<GLRenderBuffer> colorBuffer;
 	std::shared_ptr<GLRenderBuffer> depthBuffer;
 
-	void gen() override;
+	GLFrameBuffer();
 };
 
 #endif

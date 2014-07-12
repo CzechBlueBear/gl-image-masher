@@ -1,22 +1,23 @@
 #ifndef GL_RENDERBUFFER_HPP
 #define GL_RENDERBUFFER_HPP
 
+#include <memory>
 #include "GLObject.hpp"
 
 class GLRenderBuffer : public GLBindableObject {
 public:
 
-	GLRenderBuffer();
 	~GLRenderBuffer();
 
 	/**
-	 * Initializes the buffer, setting its format and size and allocating
-	 * appropriate memory. The initial contents of the buffer are undefined.
-	 *
-	 * @note This call causes the buffer to be bound. Multiple calls to
-	 * init() have no effect (except for binding the buffer).
+	 * Creates a new renderbuffer, allocates its memory, and binds it.
+	 * @param format Renderbuffer format.
+	 * @param width Width in pixels.
+	 * @param height Height in pixels.
+	 * @return A shared pointer to the new renderbuffer, or null
+	 * if an error occurred.
 	 */
-	void init(GLenum format, int width, int height);
+	static std::shared_ptr<GLRenderBuffer> create(GLenum format, int width, int height);
 
 	void bind() override;
 	static void bindNone();
@@ -25,10 +26,7 @@ public:
 
 protected:
 
-	/** True if the object is fully initialized. */
-	bool initialized;
-
-	void gen() override;
+	GLRenderBuffer();
 };
 
 #endif

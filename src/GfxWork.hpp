@@ -32,8 +32,7 @@ public:
 
 protected:
 
-	std::shared_ptr<GLVertexBuffer> vertexBuffer;
-	std::shared_ptr<GLIndexBuffer> indexBuffer;
+	std::shared_ptr<GLBuffer> vertexBuffer, indexBuffer;
 	std::shared_ptr<GLVertexArray> vao;
 	std::shared_ptr<GLShaderProgram> shaderProgram;
 	std::shared_ptr<GLTexture2D> texture;

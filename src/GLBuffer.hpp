@@ -1,71 +1,54 @@
 #ifndef GLBUFFER_HPP
 #define GLBUFFER_HPP
 
+#include <memory>
 #include "GLObject.hpp"
 
-template <GLenum TARGET>
 class GLBuffer : public GLBindableObject {
 public:
 
-	GLBuffer();
 	~GLBuffer();
 
 	/**
-	 * Initializes the buffer, setting its size, allocating appropriate
-	 * GPU memory, (optionally) filling it with data and setting a hint
-	 * about how the buffer will be used.
-	 *
-	 * This call should only be used once; it is an error to call it second
-	 * time (use reinit() if needed).
-	 *
-	 * @note The call binds the buffer to its target, and the buffer
-	 * remains bound after returning.
-	 * @param size Size of the buffer in bytes.
-	 * @param source Pointer to a block of source data to copy into the bufer,
-	 * or null to leave the buffer uninitialized (with unspecified contents).
-	 * @param usage Hint about how the buffer will be used.
+	 * Creates a buffer, allocates a space for it in GPU memory and optionally
+	 * fills it with data. The buffer becomes bound to its specified target.
+	 * @return A pointer to the newly created buffer.
 	 */
-	void init(size_t size, const void *source, GLenum usage);
+	static std::shared_ptr<GLBuffer> create(GLenum target, size_t size, const void *source, GLenum usage);
 
 	/**
-	 * Reinitializes the buffer, freeing its old contents, possibly resizing
-	 * and/or moving it in GPU memory, and optionally refilling it with data.
-	 *
-	 * @note The call binds the buffer to its target, and the buffer
-	 * remains bound after returning.
-	 * @param size New size of the buffer in bytes.
-	 * @param source Pointer to a block of source data to copy into the buffer,
-	 * or null to leave the buffer uninitialized (with unspecified contents).
+	 * Returns the size of the buffer in bytes.
 	 */
-	void reinit(size_t size, const void *source);
+	size_t getSize() const { return size; }
 
 	void bind() override;
-	static void bindNone();
+	void unbind();
 
 protected:
 
-	void gen() override;
+	/**
+	 * Constructor.
+	 * Stores the target, size, and usage hint, and allocates a name
+	 * for the buffer. No memory is allocated for the buffer yet,
+	 * and the buffer does *not* get bound.
+	 * If the name allocation fails, panic() is invoked.
+	 */
+	GLBuffer(GLenum target, size_t size, GLenum usage);
+
+	/**
+	 * Target as specified in create().
+	 */
+	GLenum target;
+
+	/**
+	 * Buffer size in bytes.
+	 */
+	size_t size;
+
+	/**
+	 * Usage hint as specified in create().
+	 */
+	GLenum usage;
 };
-
-/**
- * A buffer that contains vertex attributes.
- * The contents of the buffer can be either a simple array of values
- * for the attribute (e.g. vectors of 3 floats for vertex position),
- * or an array of structures that can hold multiple (possibly all)
- * attribute values for every vertex.
- */
-class GLVertexBuffer : public GLBuffer<GL_ARRAY_BUFFER> {
-public:
-
-	GLVertexBuffer() {}
-};
-
-class GLIndexBuffer : public GLBuffer<GL_ELEMENT_ARRAY_BUFFER> {
-public:
-
-	GLIndexBuffer() {}
-};
-
-#include "GLBuffer.tmpl.cpp"
 
 #endif

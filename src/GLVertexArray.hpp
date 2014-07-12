@@ -1,6 +1,7 @@
 #ifndef GLVERTEX_ARRAY_HPP
 #define GLVERTEX_ARRAY_HPP
 
+#include <memory>
 #include "GLObject.hpp"
 
 /**
@@ -24,8 +25,14 @@
 class GLVertexArray : public GLBindableObject {
 public:
 
-	GLVertexArray();
 	~GLVertexArray();
+
+	/**
+	 * Creates a new vertex array without any saved state.
+	 * @return A pointer to the newly created vertex array, or null
+	 * if an error occurred.
+	 */
+	static std::shared_ptr<GLVertexArray> create();
 
 	/**
 	 * Binds the array.
@@ -33,9 +40,8 @@ public:
 	 * If the array has a previously recorded state, it is restored;
 	 * if this is the first time the array is bound, the current state
 	 * is recorded.
-	 *
-	 * While bound, the array records every change to vertex array
-	 * settings.
+	 * From the point of binding, the array records every change
+	 * to vertex array settings.
 	 */
 	void bind() override;
 
@@ -43,7 +49,7 @@ public:
 
 protected:
 
-	void gen() override;
+	GLVertexArray();
 };
 
 #endif

@@ -3,7 +3,7 @@
 
 #include <string>
 #include "GLRuntime.hpp"
-#include "panic.hpp"         // for emergency exit from gen() and similar
+#include "panic.hpp"
 
 /**
  * Base for all objects that represent a GL object or resource.
@@ -13,17 +13,14 @@ public:
 
 	/**
 	 * Constructor.
-	 * The name is initialized to 0 (always an empty object).
-	 *
-	 * Derived classes can do any non-OpenGL initialization here but
-	 * no OpenGL calls should be done here (the constructor can be called
-	 * early and it is nontrivial for the programmer to ensure that
-	 * OpenGL runtime is initialized at that point).
+	 * It initializes the name to 0 and otherwise does no action.
 	 */
 	GLObject() : name(0) { }
 
 	/**
 	 * Destructor (empty).
+	 * Derived classes should call the appropriate glDelete...() function
+	 * (or similar) here.
 	 */
 	virtual ~GLObject() { }
 
@@ -50,36 +47,8 @@ protected:
      *
 	 * Name of 0 never refers to any existing object and is used
 	 * as a predefined empty value.
-	 *
-	 * The constructor sets name to 0. The gen() call should obtain
-	 * a valid number and store it here.
 	 */
-	GLuint name = 0;
-
-	/**
-	 * Set to true if the object is fully initialized, which means
-	 * calling (usually) something like init(). Calling gen() typically
-	 * is not enough to completely initialize the object.
-	 */
-	bool initialized = false;
-
-	/**
-	 * Generates the underlying OpenGL object
-	 * (using one of glGen...() calls).
-	 *
-	 * Failure of the glGen...() call is considered a fatal error
-	 * (it usually means that OpenGL is completely out of resources
-	 * or that memory has been corrupted) and panic() is the recommended
-	 * course of action.
-	 *
-	 * @important In most cases, the glGen...() call does not suffice
-	 * to have a functional object, and additional initialization is needed.
-	 * Derived classes should arrange this initialization on first use,
-	 * transparently to the programmer. If this is not possible (usually
-	 * because extra information is needed), a public call like init()
-	 * or load() shall be provided.
-	 */
-	virtual void gen() = 0;
+	GLuint name;
 };
 
 /**

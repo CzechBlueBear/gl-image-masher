@@ -26,7 +26,7 @@ public:
 
 protected:
 
-	void gen() override;
+	void gen();
 };
 
 class GLTexture2D : public GLTexture<GL_TEXTURE_2D> {

@@ -1,26 +1,24 @@
 #include "GLFramebuffer.hpp"
 
-GLFrameBuffer::GLFrameBuffer()
-{
-}
-
 GLFrameBuffer::~GLFrameBuffer()
 {
 	glDeleteFramebuffers(1, &name);
 }
 
-void GLFrameBuffer::gen()
+std::shared_ptr<GLFrameBuffer> GLFrameBuffer::create(std::shared_ptr<GLRenderBuffer> colorBuffer,
+	std::shared_ptr<GLRenderBuffer> depthBuffer)
 {
-	if (name)
-		panic("object already exists");
-	glGenFramebuffers(1, &name);
-	if (!name)
-		panic("Unable to generate an OpenGL Framebuffer object");
+	auto that = std::shared_ptr<GLFrameBuffer>(new GLFrameBuffer());
+	that->colorBuffer = colorBuffer;
+	that->depthBuffer = depthBuffer;
+	glBindFramebuffer(GL_FRAMEBUFFER, that->name);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorBuffer->name);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer->name);
+	return that;
 }
 
 void GLFrameBuffer::bind()
 {
-	if (!name) gen();
 	glBindFramebuffer(GL_FRAMEBUFFER, name);
 }
 
@@ -29,12 +27,9 @@ void GLFrameBuffer::bindNone()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void GLFrameBuffer::init(std::shared_ptr<GLRenderBuffer> colorBuffer,
-	std::shared_ptr<GLRenderBuffer> depthBuffer)
+GLFrameBuffer::GLFrameBuffer()
 {
-	bind();
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorBuffer->name);
-	this->colorBuffer = colorBuffer;
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer->name);
-	this->depthBuffer = depthBuffer;
+	glGenFramebuffers(1, &name);
+	if (!name)
+		panic("Unable to create a GL framebuffer object: glGenFramebuffers() failed: " + translateGLError(glGetError()));
 }
