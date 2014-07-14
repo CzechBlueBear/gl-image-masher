@@ -1,72 +1,75 @@
 #include <iostream>
+#include "debug.hpp"
 #include "GLTexture.hpp"
 
-GLTexture2D::GLTexture2D()
+GLTexture::~GLTexture()
 {
+	glDeleteTextures(1, &name);
 }
 
-GLTexture2D::~GLTexture2D()
+std::shared_ptr<GLTexture> GLTexture::create2d(
+	GLenum internalFormat,
+	FilterRule filterRule,
+	EdgeRule edgeRule,
+	PixelImage &image)
 {
-}
+	auto that = std::shared_ptr<GLTexture>(new GLTexture(GL_TEXTURE_2D));
 
-void GLTexture2D::load(PixelImage &image)
-{
-	// Reset the filtering (because if it was set to mipmaps, which is the default,
-	// loading just one image would make the texture incomplete and unusable)
-	// This call also binds the texture.
-	setMinMagFilter(GL_LINEAR, GL_LINEAR);
+	that->bind();
 
-	// upload the image to the (currently bound) texture, resetting its size
-	// and replacing old contents
+	glTexParameteri(that->target, GL_TEXTURE_MIN_FILTER, filterRule.minFilter);
+	glTexParameteri(that->target, GL_TEXTURE_MAG_FILTER, filterRule.magFilter);
+	glTexParameteri(that->target, GL_TEXTURE_WRAP_S, edgeRule.edgeX);
+	glTexParameteri(that->target, GL_TEXTURE_WRAP_T, edgeRule.edgeY);
+	glTexParameteri(that->target, GL_TEXTURE_WRAP_R, edgeRule.edgeZ);
+
+	GLenum imageFormat;
+	GLenum imageUnitType;
+
 	switch (image.getFormat()) {
-	case image.Format::RGB:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-			image.getWidth(), image.getHeight(), 0,
-			GL_RGB, GL_UNSIGNED_BYTE, image.getData());
+	case PixelImage::Format::RGB:
+		imageFormat = GL_RGB;
+		imageUnitType = GL_UNSIGNED_BYTE;
 		break;
 
-	case image.Format::RGBA:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-			image.getWidth(), image.getHeight(), 0,
-			GL_RGBA, GL_UNSIGNED_BYTE, image.getData());
+	case PixelImage::Format::RGBA:
+		imageFormat = GL_RGBA;
+		imageUnitType = GL_UNSIGNED_BYTE;
 		break;
 
 	default:
-		std::cerr << "unexpected source image format" << std::endl;
+		complain("Unrecognized/unsupported pixel image format");
+		return nullptr;
 	}
-}
 
-void GLTexture2D::loadCompressed(PixelImage &image)
-{
-	// Reset the filtering (because if it was set to mipmaps, which is the default,
-	// loading just one image would make the texture incomplete and unusable)
-	// This call also binds the texture.
-	setMinMagFilter(GL_LINEAR, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D,
+		0, internalFormat,
+		image.getWidth(), image.getHeight(), 0,
+		imageFormat, imageUnitType, image.getData());
 
-	// upload the image to the (currently bound) texture, resetting its size
-	// and replacing old contents
-	switch (image.getFormat()) {
-	case image.Format::RGB:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGB,
-			image.getWidth(), image.getHeight(), 0,
-			GL_RGB, GL_UNSIGNED_BYTE, image.getData());
-		break;
-
-	case image.Format::RGBA:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA,
-			image.getWidth(), image.getHeight(), 0,
-			GL_RGBA, GL_UNSIGNED_BYTE, image.getData());
-		break;
-
-	default:
-		std::cerr << "unexpected source image format" << std::endl;
+	GLenum err = glGetError();
+	if (err) {
+		complain("Error creating texture from pixel image: glTexImage2D() failed: " + translateGLError(err));
+		return nullptr;
 	}
+
+	return that;
 }
 
-GLTextureRectangle::GLTextureRectangle()
+void GLTexture::bind()
 {
+	glBindTexture(target, name);
 }
 
-GLTextureRectangle::~GLTextureRectangle()
+void GLTexture::unbind()
 {
+	glBindTexture(target, 0);
+}
+
+GLTexture::GLTexture(GLenum target)
+	: target(target)
+{
+	glGenTextures(1, &name);
+	if (!name)
+		panic("Unable to allocate GL texture: glGenTextures() failed: " + translateGLError(glGetError()));
 }

@@ -28,9 +28,12 @@ void GfxWork::processImage(const std::string &imagePath)
 	sourceImage.loadTiff(imagePath);
 
 	if (!texture) {
+		texture = GLTexture::create2d(GL_RGB5_A1, GLTexture::FilterRule(), GLTexture::EdgeRule(), sourceImage);
+/*
 		texture = std::make_shared<GLTexture2D>();
 		texture->loadCompressed(sourceImage);
 		checkGLErrors();
+*/
 	}
 
 	int imageWidth = sourceImage.getWidth();

@@ -35,7 +35,7 @@ protected:
 	std::shared_ptr<GLBuffer> vertexBuffer, indexBuffer;
 	std::shared_ptr<GLVertexArray> vao;
 	std::shared_ptr<GLShaderProgram> shaderProgram;
-	std::shared_ptr<GLTexture2D> texture;
+	std::shared_ptr<GLTexture> texture;
 	std::shared_ptr<GLFrameBuffer> framebuffer;
 	std::shared_ptr<GLRenderBuffer> colorBuffer;
 	std::shared_ptr<GLRenderBuffer> depthBuffer;

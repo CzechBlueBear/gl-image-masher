@@ -1,58 +1,54 @@
 #ifndef TEXTURE_HPP
 #define TEXTURE_HPP
 
+#include <memory>
 #include "GLObject.hpp"
 #include "PixelImage.hpp"
 
-/**
- * Base class for all textures.
- * @param TARGET The target the texture binds to; this also defines
- * the type of the texture.
- */
-template <GLenum TARGET>
 class GLTexture : public GLBindableObject {
 public:
 
-	GLTexture();
-	virtual ~GLTexture();
-	void bind() override;
-	static void bindNone();
+	struct FilterRule {
+		GLenum minFilter = GL_LINEAR;
+		GLenum magFilter = GL_LINEAR;
+	};
 
 	/**
-	 * Sets the minification and magnification filter of the texture.
-	 * @note The call binds the texture which remains bound after returning.
+	 * The edge rule specifies how the texels with coordinates outside
+	 * of texture boundaries are synthesized.
 	 */
-	void setMinMagFilter(GLenum minFilter, GLenum magFilter);
+	struct EdgeRule {
+		GLenum edgeX = GL_REPEAT;
+		GLenum edgeY = GL_REPEAT;
+		GLenum edgeZ = GL_REPEAT;
+	};
+
+	virtual ~GLTexture();
+
+	/**
+	 * Creates a 2D texture (one that binds to the GL_TEXTURE_2D target).
+	 */
+	static std::shared_ptr<GLTexture> create2d(
+		GLenum internalFormat,
+		FilterRule filterRule,
+		EdgeRule edgeRule,
+		PixelImage &image);
+
+	void bind() override;
+	void unbind();
 
 protected:
 
-	void gen();
-};
-
-class GLTexture2D : public GLTexture<GL_TEXTURE_2D> {
-public:
-
-	GLTexture2D();
-	~GLTexture2D();
+	/**
+	 * The target of the texture (also determines the texture type).
+	 */
+	GLenum target;
 
 	/**
-	 * Loads the specified image into the texture.
-	 * A texture loaded this way does not have mipmaps. Initial
-	 * magnifying and minifying filter is set to LINEAR.
-	 * @note The call binds the texture which remains bound after returning.
+	 * Constructor. Allocates a GL name for the texture and stores
+	 * the target.
 	 */
-	void load(PixelImage &image);
-
-	void loadCompressed(PixelImage &image);
+	GLTexture(GLenum target);
 };
-
-class GLTextureRectangle : public GLTexture<GL_TEXTURE_RECTANGLE> {
-public:
-
-	GLTextureRectangle();
-	~GLTextureRectangle();
-};
-
-#include "GLTexture.tmpl.cpp"
 
 #endif

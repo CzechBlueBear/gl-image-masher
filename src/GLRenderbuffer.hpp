@@ -26,6 +26,11 @@ public:
 
 protected:
 
+	/**
+	 * Constructor.
+	 * Allocates the name for the render buffer but does not allocate
+	 * any memory for it yet. The buffer is not bound.
+	 */
 	GLRenderBuffer();
 };
 

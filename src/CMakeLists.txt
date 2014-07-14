@@ -1,5 +1,6 @@
 add_executable(tiffcruncher
-	main.cpp panic.cpp
+	main.cpp
+	panic.cpp debug.cpp
 	FileUtils.cpp
 	GfxWork.cpp
 	GLRuntime.cpp GLObject.cpp
