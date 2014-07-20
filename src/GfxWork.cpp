@@ -5,10 +5,9 @@
 #include "Vertex.hpp"
 #include "main.hpp"
 
-GfxWork::GfxWork(const std::string &outputDirectory, int workspaceWidth, int workspaceHeight)
+GfxWork::GfxWork(int workspaceWidth, int workspaceHeight)
 	: workspaceWidth(workspaceWidth),
-	workspaceHeight(workspaceHeight),
-	outputDirectory(outputDirectory)
+	workspaceHeight(workspaceHeight)
 {
 	corners = {
 		SimpleTexturedVertex { { -1.0f, -1.0f, 0.0f }, { 0.0f, 1.0f } },		// top left

@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 	GLRuntime glRuntime;		// must be created before any GL-related objects
 
 	// create the graphics work thread object and execute it
-	std::shared_ptr<GfxWork> theGfxWork = std::make_shared<GfxWork>("out/", 10000, 10000);
+	std::shared_ptr<GfxWork> theGfxWork = std::make_shared<GfxWork>(10000, 10000);
 
 	// example of deformation
 	theGfxWork->setCorner(GfxWork::Corner::TOP_LEFT, -0.6f, -0.6f);

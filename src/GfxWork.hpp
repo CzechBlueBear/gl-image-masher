@@ -15,7 +15,7 @@
 class GfxWork {
 public:
 
-	GfxWork(const std::string &outputDirectory, int workspaceWidth, int workspaceHeight);
+	GfxWork(int workspaceWidth, int workspaceHeight);
 	~GfxWork();
 	GfxWork(const GfxWork &source) = delete;
 	GfxWork &operator=(const GfxWork &source) = delete;
@@ -41,7 +41,6 @@ protected:
 	std::shared_ptr<GLRenderBuffer> depthBuffer;
 	int workspaceWidth;
 	int workspaceHeight;
-	std::string outputDirectory;
 
 	/// Corners of the image, shifting those allows for various deformation.
 	std::array<SimpleTexturedVertex, 4> corners;
