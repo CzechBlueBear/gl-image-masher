@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	theGfxWork->setCorner(GfxWork::Corner::TOP_RIGHT, 0.8f, -1.0f);
 	theGfxWork->setCorner(GfxWork::Corner::BOTTOM_LEFT, -1.0f, 0.9f);
 
-	theGfxWork->processImage("input.tif");
+	theGfxWork->processImage("input.tif", "result.tif");
 
 	// cleanup
 	return 0;

@@ -19,7 +19,7 @@ public:
 	~GfxWork();
 	GfxWork(const GfxWork &source) = delete;
 	GfxWork &operator=(const GfxWork &source) = delete;
-	void processImage(const std::string &imagePath);
+	void processImage(const std::string &imagePath, const std::string &outputPath);
 
 	enum class Corner {
 		TOP_LEFT = 0,

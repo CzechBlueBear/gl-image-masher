@@ -22,7 +22,7 @@ GfxWork::~GfxWork()
 {
 }
 
-void GfxWork::processImage(const std::string &imagePath)
+void GfxWork::processImage(const std::string &imagePath, const std::string &outputPath)
 {
 	PixelImage sourceImage;
 	sourceImage.loadTiff(imagePath);
@@ -136,8 +136,8 @@ void GfxWork::processImage(const std::string &imagePath)
 	PixelImage result;
 	result.reset(imageWidth, imageHeight);
 	result.screenshot(0, 0, imageWidth, imageHeight);
-	if (!result.saveTiff("result.tif")) {
-		std::cerr << "error writing result.tiff" << std::endl;
+	if (!result.saveTiff(outputPath)) {
+		std::cerr << "error writing " << outputPath << std::endl;
 	}
 }
 
