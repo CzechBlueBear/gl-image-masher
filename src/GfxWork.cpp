@@ -5,10 +5,9 @@
 #include "Vertex.hpp"
 #include "main.hpp"
 
-GfxWork::GfxWork(const std::string &outputDirectory, int workspaceWidth, int workspaceHeight)
+GfxWork::GfxWork(int workspaceWidth, int workspaceHeight)
 	: workspaceWidth(workspaceWidth),
-	workspaceHeight(workspaceHeight),
-	outputDirectory(outputDirectory)
+	workspaceHeight(workspaceHeight)
 {
 	corners = {
 		SimpleTexturedVertex { { -1.0f, -1.0f, 0.0f }, { 0.0f, 1.0f } },		// top left
@@ -22,7 +21,7 @@ GfxWork::~GfxWork()
 {
 }
 
-void GfxWork::processImage(const std::string &imagePath)
+void GfxWork::processImage(const std::string &imagePath, const std::string &outputPath)
 {
 	PixelImage sourceImage;
 	sourceImage.loadTiff(imagePath);
@@ -136,8 +135,8 @@ void GfxWork::processImage(const std::string &imagePath)
 	PixelImage result;
 	result.reset(imageWidth, imageHeight);
 	result.screenshot(0, 0, imageWidth, imageHeight);
-	if (!result.saveTiff("result.tif")) {
-		std::cerr << "error writing result.tiff" << std::endl;
+	if (!result.saveTiff(outputPath)) {
+		std::cerr << "error writing " << outputPath << std::endl;
 	}
 }
 
